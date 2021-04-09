@@ -1,0 +1,15 @@
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: acme-crt
+  namespace: ingress
+spec:
+  secretName: acme-crt-secret
+  commonName: "*.rvprobs.com"
+  dnsNames:
+  - 'rvprobs.com'
+  - '*.rvprobs.com'
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer

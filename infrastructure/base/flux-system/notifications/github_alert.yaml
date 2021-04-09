@@ -1,0 +1,23 @@
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta1
+kind: Alert
+metadata:
+  name: cluster
+  namespace: flux-system
+spec:
+  providerRef:
+    name: flux-system
+  eventSeverity: info
+  eventSources:
+    - kind: Kustomization
+      name: flux-system
+      namespace: flux-system
+    - kind: Kustomization
+      name: operations
+      namespace: flux-system
+    - kind: Kustomization
+      name: infrastructure
+      namespace: flux-system
+    - kind: Kustomization
+      name: apps
+      namespace: flux-system
