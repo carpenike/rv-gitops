@@ -1,5 +1,6 @@
 #!/bin/sh
-FILE_WITH_SECRETS=$(grep -lZRPi '^kind:\s+secret' . | xargs -r0 grep -L 'ENC.AES256')
+FILES_TO_EXCLUDE="--exclude coredns-etcd-secret.yaml.j2"
+FILE_WITH_SECRETS=$(grep -lZRPi $FILES_TO_EXCLUDE '^kind:\s+secret' . | xargs -r0 grep -L 'ENC.AES256')
 if [ -z "$FILE_WITH_SECRETS" ]; then
   exit 0
 else
