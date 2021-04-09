@@ -16,3 +16,27 @@ jobs:
         uses: ./.github/actions/tools
       - name: Validate manifests
         run: ./scripts/validate.sh
+
+  yaml:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+    - name: Lint YAML
+      uses: ibiqlik/action-yamllint@v3
+      with:
+        file_or_dir: "."
+        config_file: "./.github/yamllint.config.yaml"
+
+  bash:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+    - name: Lint Hack Scripts
+      uses: reviewdog/action-shellcheck@v1
+      with:
+        path: "./scripts"
+        level: "error"
