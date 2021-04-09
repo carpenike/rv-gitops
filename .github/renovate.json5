@@ -11,11 +11,20 @@
   "rebaseWhen": "conflicted",
   "assignees": ["@carpenike"],
   "helm-values": {
-    "fileMatch": ["cluster/.+\\.yaml$"]
+    "fileMatch": ["./.+\\.yaml$"]
+  },
+  "kubernetes": {
+    "fileMatch": ["\\.yaml$"],
+    "ignorePaths": [
+      "clusters",
+      "ansible",
+      "scripts",
+      ".github"
+    ],
   },
   "regexManagers": [
     {
-      "fileMatch": ["cluster/.+\\.yaml$"],
+      "fileMatch": ["./.+\\.yaml$"],
       "matchStrings": [
         "registryUrl=(?<registryUrl>.*?)\n *chart: (?<depName>.*?)\n *version: (?<currentValue>.*)\n"
       ],
@@ -27,6 +36,14 @@
     {
       "datasources": ["helm"],
       "commitMessageTopic": "Helm chart {{depName}}",
+      "separateMinorPatch": true
+    },
+    {
+      "datasources": ["docker"],
+      "commitMessageTopic": "Docker image {{depName}}",
+      "commitMessageExtra": "to {{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}",
+      "updateTypes": ["major", "minor", "patch"],
+      "enabled": true,
       "separateMinorPatch": true
     },
     // Add labels according to package and update types
@@ -61,12 +78,6 @@
       "updateTypes": ["patch"],
       "labels": ["renovate/helm-release", "dependency/patch"]
     },
-    // Pin package versions
-    {
-      "datasources": ["docker"],
-      "allowedVersions": "<4.3.0",
-      "packageNames": ["ghcr.io/k8s-at-home/qbittorrent"]
-    },
     // version strategies
     {
       "matchDatasources": ["docker"],
@@ -75,16 +86,32 @@
         "ghcr.io/k8s-at-home/plex"
       ]
     },
-    // enable auto-merge
+    // auto-updates
     {
-      "matchDatasources": ["docker"],
+      "datasources": ["docker"],
       "automerge": true,
-      "automergeType": "branch",
       "requiredStatusChecks": null,
-      "matchUpdateTypes": ["minor", "patch"],
-      "matchPackageNames": [
+      "schedule": "after 1am and before 5am",
+      "updateTypes": ["minor", "patch"],
+      "packageNames": [
+        "homeassistant/home-assistant",
         "ghcr.io/k8s-at-home/plex"
       ]
+    },
+    {
+      "datasources": ["helm"],
+      "automerge": true,
+      "requiredStatusChecks": null,
+      "schedule": "after 1am and before 5am",
+      "updateTypes": ["minor", "patch"],
+      // "packageNames": [
+      //   "homeassistant/home-assistant",
+      //   "ghcr.io/k8s-at-home/radarr",
+      //   "ghcr.io/k8s-at-home/sonarr",
+      //   "ghcr.io/k8s-at-home/nzbget",
+      //   "plexinc/pms-docker",
+      //   "hotio/readarr"
+      // ]
     }
   ]
 }
