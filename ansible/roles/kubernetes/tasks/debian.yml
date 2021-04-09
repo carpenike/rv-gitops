@@ -1,0 +1,109 @@
+---
+# Instructions: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl
+- name: add apt signing key for kubernetes (1/4)
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+# Removed the following repo due to stability issues: https://apt.kubernetes.io/
+- name: adding apt repository for kubernetes (2/4)
+  apt_repository:
+    repo: deb http://packages.cloud.google.com/apt/ kubernetes-xenial main
+    state: present
+  register: kubernetes_repository
+  retries: 10
+  until: kubernetes_repository is success
+
+# To downgrade these packages use the following apt options:
+#   dpkg_options: force-downgrade
+#   force: yes
+- name: install kubernetes packages (3/4)
+  apt:
+    name:
+      - kubelet={{ kubernetes_kubelet_version }}
+      - kubeadm={{ kubernetes_kubeadm_version }}
+      - kubectl={{ kubernetes_kubectl_version }}
+    state: present
+    force: true
+    update_cache: true
+  register: apt_install_kube
+  retries: 5
+  until: apt_install_kube is success
+
+- name: add apt-mark hold to avoid version skew issues. (4/4)
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - 'kubectl'
+    - 'kubelet'
+    - 'kubeadm'
+
+- name: add apt signing key for helm (1/3)
+  apt_key:
+    url: https://baltocdn.com/helm/signing.asc
+    state: present
+
+- name: adding apt repository for helm (2/3)
+  apt_repository:
+    repo: deb https://baltocdn.com/helm/stable/debian/ all main
+    state: present
+  register: helm_repository
+  retries: 10
+  until: helm_repository is success
+
+- name: install helm package (3/3)
+  apt:
+    name: helm
+    state: present
+    force: true
+    update_cache: true
+  register: apt_install_helm
+  retries: 5
+  until: apt_install_helm is success
+
+# Adding required Kubernetes cgroups
+- name: create the nobtcmd.txt file if it does not exist
+  become: true
+  file:
+    path: /boot/firmware/nobtcmd.txt
+    state: touch
+    mode: 0644
+  when: ansible_architecture | regex_search('arm|aarch')
+
+- name: enable required cgroup features
+  lineinfile:
+    path: '{{ common_rpi_cmd_file }}'
+    state: present
+    backrefs: true
+    regexp: '^(.*fixrtc)$'
+    line: '\1 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory'
+  notify: reboot hosts
+  when: ansible_architecture | regex_search('arm|aarch')
+
+# Set /proc/sys/net/bridge/bridge-nf-call-iptables to 1 by running
+# sysctl net.bridge.bridge-nf-call-iptables=1 to pass bridged IPv4 traffic to iptables’ chains.
+# This is a requirement for some CNI plugins to work, these persist across reboots.
+# https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#letting-iptables-see-bridged-traffic
+- name: Update bridged IPv4 traffic to iptables' chains
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: '1'
+    state: present
+    sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf
+
+- name: Update bridged IPv4 traffic to ip6tables' chains
+  sysctl:
+    name: net.bridge.bridge-nf-call-ip6tables
+    value: '1'
+    state: present
+    sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf
+
+# Required for containerd CRI prerequisites
+# https://kubernetes.io/docs/setup/production-environment/container-runtimes/#prerequisites-1
+- name: Update bridged IPv4 traffic forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf

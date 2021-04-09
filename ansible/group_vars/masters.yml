@@ -1,0 +1,6 @@
+---
+# Role - cluster
+cluster_extra_sans:
+  - "{{ keepalived_vip }}"
+  - k8s.rvprobs.com
+cluster_control_plane_endpoint: "k8s.rvprobs.com:6443"
