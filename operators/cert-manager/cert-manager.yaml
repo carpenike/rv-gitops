@@ -37,7 +37,7 @@ spec:
       - key: "arm"
         operator: "Exists"
     prometheus:
-      enabled: true
+      enabled: false
       servicemonitor:
-        enabled: true
+        enabled: false
         prometheusInstance: monitoring
