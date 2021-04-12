@@ -12,11 +12,11 @@
     - swap
     - none
 
-- name: start time services
-  service:
-    name: systemd-timesyncd
-    state: started
-    enabled: true
+# - name: start time services
+#   service:
+#     name: systemd-timesyncd
+#     state: started
+#     enabled: true
 
 - name: run timedatectl status
   command: /usr/bin/timedatectl show
