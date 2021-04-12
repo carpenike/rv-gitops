@@ -49,9 +49,9 @@
         name: default
       spec:
         serviceClusterIPs:
-        - cidr: 10.43.0.0/16
+        - cidr: 10.93.0.0/16
         serviceExternalIPs:
-        - cidr: 10.45.0.0/16
+        - cidr: 10.95.0.0/16
   environment:
     CALICO_DATASTORE_TYPE: kubernetes
     CALICO_KUBECONFIG: /etc/kubernetes/admin.conf
