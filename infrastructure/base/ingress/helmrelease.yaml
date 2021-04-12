@@ -31,9 +31,9 @@ spec:
         - 10.95.20.10
         externalTrafficPolicy: Local
       metrics:
-        enabled: true
+        enabled: false
         serviceMonitor:
-          enabled: true
+          enabled: false
           namespace: ingress
         prometheusRule:
           enabled: false
