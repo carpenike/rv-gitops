@@ -10,7 +10,7 @@
 
 A Kubernetes "cluster" managed by Flux ... in an RV :)
 
-Why Kubernetes? Mainly because all deployments and configuration can be stored as "code" within a Git environment. 
+Why Kubernetes? Mainly because all deployments and configuration can be stored as "code" within a Git environment.
 
 All of the services deployed are centered around a mobile environment tailored towards an RV.
 
